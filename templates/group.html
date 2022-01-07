@@ -1,0 +1,41 @@
+ 
+    <link rel="stylesheet" href="assets/css/main.css" />
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="assets/js/gruop.js"></script>
+
+
+  <body>
+    <h2>中東館部門管理｜Access control system</h2>
+
+    <div>
+      <a href="user">會員管理</a>
+      <a href="group" class="now">部門管理</a>
+      <a href="login">登入</a>
+    </div>
+
+    <button type="button" class="myBtn add addBtn">新增</button>
+
+    <div id="myModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <table>
+          <tr>
+            <h2 id="editlabel"></h2>
+          </tr>
+          <tr>
+            group:
+            <input type="text" id="group" placeholder="group" required />
+            groupId:
+            <input type="text" id="groupId" placeholder="groupId" required />
+            door:
+            <input type="text" id="door" placeholder="door" required />
+            <input type="button" class="add-row" value="" />
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <table id="tb"></table>
+    <button type="button" class="delete-row">刪除</button>
+  </body>
+</html>
