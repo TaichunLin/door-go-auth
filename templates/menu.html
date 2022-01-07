@@ -6,17 +6,15 @@
       <a class="navbar-brand" href="/"> Home </a>
     </div>
     <ul class="nav navbar-nav">
-      <li><a href="/user">會員管理</a></li>
-      <li><a href="/group">部門管理</a></li>
-
       {{ if .is_logged_in }}
-      <li><a href="/article/create">Create Article</a></li>
+      <li><a href="/view/user">會員管理</a></li>
+      <li><a href="/view/group">部門管理</a></li>
       {{end}} {{ if not .is_logged_in }}
-      <li><a href="/user/register">Register</a></li>
+      <li><a href="/auth/register">Register</a></li>
       {{end}} {{ if not .is_logged_in }}
-      <li><a href="/user/login">Login</a></li>
+      <li><a href="/auth/login">Login</a></li>
       {{end}} {{ if .is_logged_in }}
-      <li><a href="/user/logout">Logout</a></li>
+      <li><a href="/auth/logout">Logout</a></li>
       {{end}}
     </ul>
   </div>
