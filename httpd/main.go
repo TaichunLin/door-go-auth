@@ -1,7 +1,6 @@
 package main
 
 import (
-	"GO-GIN_REST_API/article"
 	"GO-GIN_REST_API/auth"
 	"GO-GIN_REST_API/httpd/handler"
 	"GO-GIN_REST_API/middleware"
@@ -53,7 +52,7 @@ func main() {
 		apiRoutes.GET("/deleteGroup", h.DeleteGroupRoute())
 	}
 
-	r.GET("/", article.ShowIndexPage)
+	r.GET("/", handler.ShowIndexPage())
 
 	AuthRoutes := r.Group("/auth")
 	{
@@ -63,16 +62,6 @@ func main() {
 		AuthRoutes.GET("/login", middleware.EnsureNotLoggedIn(), auth.ShowLoginPage)
 		AuthRoutes.POST("/login", middleware.EnsureNotLoggedIn(), auth.PerformLogin)
 		AuthRoutes.GET("/logout", middleware.EnsureLoggedIn(), auth.Logout)
-	}
-
-	articleRoutes := r.Group("/article")
-	{
-
-		articleRoutes.GET("/view/:article_id", article.GetArticle)
-
-		articleRoutes.GET("/create", middleware.EnsureLoggedIn(), article.ShowArticleCreationPage)
-
-		articleRoutes.POST("/create", middleware.EnsureLoggedIn(), article.CreateArticle)
 	}
 
 	r.Run(":1106")

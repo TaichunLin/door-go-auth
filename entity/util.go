@@ -18,3 +18,8 @@ type UserList struct {
 	Group    string `json:"group"`
 	GroupId  string `json:"groupId"`
 }
+
+type AuthUser struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}

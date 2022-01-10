@@ -10,7 +10,7 @@ func (h *Handler) DeleteGroupRoute() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		groupId := c.Query("groupId")
 
-		err := h.backend.Del("b2:dm:group:" + groupId)
+		err := h.Backend.Del("b2:dm:group:" + groupId)
 		if err != nil {
 			log.Println("err:", err)
 			c.String(200, "not found this group")

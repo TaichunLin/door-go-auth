@@ -10,7 +10,7 @@ func (h *Handler) DeleteUserRoute() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		cardId := c.Query("cardId")
 
-		err := h.backend.Del("b2:dm:user:" + cardId)
+		err := h.Backend.Del("b2:dm:user:" + cardId)
 		if err != nil {
 			log.Println("err:", err)
 			c.String(200, "not found this group")

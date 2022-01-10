@@ -15,7 +15,7 @@ func (h *Handler) AddGroupRoute() gin.HandlerFunc {
 		door := c.Query("door")
 		group := c.Query("group")
 
-		err := h.backend.SetGroup("b2:dm:group:"+groupId, &entity.Group{Group: group, GroupId: groupId, Door: door})
+		err := h.Backend.SetGroup("b2:dm:group:"+groupId, &entity.Group{Group: group, GroupId: groupId, Door: door})
 		if err != nil {
 			log.Println("SetGroup failed:", err)
 		} else {

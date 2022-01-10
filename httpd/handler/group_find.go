@@ -10,7 +10,7 @@ func (h *Handler) FindGroupRoute() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		groupId := c.Query("groupId")
 
-		val := h.backend.GetGroup("b2:dm:group:" + groupId)
+		val := h.Backend.GetGroup("b2:dm:group:" + groupId)
 		if val != nil {
 			log.Println("GetGroup:", val)
 		}

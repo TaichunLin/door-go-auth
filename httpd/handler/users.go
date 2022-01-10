@@ -8,7 +8,7 @@ import (
 
 func (h *Handler) FetchAllUsers() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		val := h.backend.GetAllUsers()
+		val := h.Backend.GetAllUsers()
 		if val != nil {
 			log.Println("GetAllUsers:", val)
 		}

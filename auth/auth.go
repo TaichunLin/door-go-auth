@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"GO-GIN_REST_API/cache"
+	"GO-GIN_REST_API/entity"
 	"errors"
 	"log"
 	"math/rand"
@@ -11,34 +13,28 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type user struct {
-	Username string `json:"username"`
-	Password string `json:"-"`
-}
+var (
+	redisconf = &cache.RedisConfig{Endpoint: "localhost:6379", Password: "", Database: 0, PoolSize: 0}
+	redis, _  = cache.NewRedis(redisconf)
+)
 
-var userList = []user{
-	{Username: "user1", Password: "pass1"},
-	{Username: "user2", Password: "pass2"},
-	{Username: "user3", Password: "pass3"},
-}
-
-func RegisterNewUser(username, password string) (*user, error) {
+func RegisterNewUser(username, password string) (*entity.AuthUser, error) {
 	if strings.TrimSpace(password) == "" {
 		return nil, errors.New("the password can't be empty")
 	} else if !IsUsernameAvailable(username) {
 		return nil, errors.New("the username isn't available")
 	}
 
-	u := user{Username: username, Password: password}
-
-	userList = append(userList, u)
+	u := entity.AuthUser{Username: username, Password: password}
 
 	return &u, nil
 }
 
 func IsUsernameAvailable(username string) bool {
-	for _, u := range userList {
-		if u.Username == username {
+
+	val := redis.GetAuth("b2:dm:session:" + username)
+	if val != nil {
+		if val.Username == username {
 			return false
 		}
 	}
@@ -61,10 +57,16 @@ func Register(c *gin.Context) {
 		c.SetCookie("token", token, 3600, "", "", false, true)
 		c.Set("is_logged_in", true)
 
-		c.HTML(200, "login-successful.html", gin.H{
-			"is_logged_in": c.MustGet("is_logged_in").(bool),
-			"Title":        "Successful registration & Login",
-		})
+		err := redis.SetAuth("b2:dm:session:"+username, &entity.AuthUser{Username: username, Password: password})
+		if err != nil {
+			log.Println("SetAuth failed:", err)
+		} else {
+			c.HTML(200, "login-successful.html", gin.H{
+				"is_logged_in": c.MustGet("is_logged_in").(bool),
+				"Title":        "Successful registration & Login",
+			})
+		}
+
 		c.Redirect(http.StatusTemporaryRedirect, "/")
 	} else {
 		c.HTML(http.StatusBadRequest, "register.html", gin.H{
@@ -73,8 +75,6 @@ func Register(c *gin.Context) {
 			"ErrorTitle":   "Registration Failed",
 			"ErrorMessage": err.Error()})
 	}
-
-	log.Println(userList)
 }
 
 func GenerateSessionToken() string {
@@ -82,12 +82,15 @@ func GenerateSessionToken() string {
 }
 
 func IsUserValid(username, password string) bool {
-	for _, u := range userList {
-		if u.Username == username && u.Password == password {
+
+	val := redis.GetAuth("b2:dm:session:" + username)
+	if val != nil {
+		if val.Username == username && val.Password == password {
 			return true
 		}
 	}
 	return false
+
 }
 
 func ShowLoginPage(c *gin.Context) {
@@ -116,8 +119,6 @@ func PerformLogin(c *gin.Context) {
 			"ErrorTitle":   "Login Failed",
 			"ErrorMessage": "Invalid credentials provided"})
 	}
-
-	log.Println(userList)
 }
 
 func Logout(c *gin.Context) {

@@ -14,11 +14,11 @@ func (h *Handler) AddUserRoute() gin.HandlerFunc {
 		username := c.Query("username")
 		cardId := c.Query("cardId")
 		groupId := c.Query("groupId")
-		group := h.backend.GetGroup("b2:dm:group:" + groupId).Group
-		door := h.backend.GetGroup("b2:dm:group:" + groupId).Door
+		group := h.Backend.GetGroup("b2:dm:group:" + groupId).Group
+		door := h.Backend.GetGroup("b2:dm:group:" + groupId).Door
 		log.Println("Get User's Group:", group)
 
-		err := h.backend.SetUser("b2:dm:user:"+cardId, &entity.User{Username: username, GroupId: &entity.Group{GroupId: groupId, Group: group, Door: door}, CardId: cardId})
+		err := h.Backend.SetUser("b2:dm:user:"+cardId, &entity.User{Username: username, GroupId: &entity.Group{GroupId: groupId, Group: group, Door: door}, CardId: cardId})
 
 		if err != nil {
 			log.Println("SetUser failed:", err)

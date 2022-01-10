@@ -3,7 +3,7 @@ package handler
 import "GO-GIN_REST_API/cache"
 
 type Handler struct {
-	backend *cache.RedisClient
+	Backend *cache.RedisClient
 }
 
 func NewHandler() *Handler {
@@ -12,5 +12,5 @@ func NewHandler() *Handler {
 	if err != nil {
 		panic(err)
 	}
-	return &Handler{backend: redis}
+	return &Handler{Backend: redis}
 }

@@ -8,7 +8,7 @@ import (
 
 func (h *Handler) FetchAllGroups() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		val := h.backend.GetAllGroup()
+		val := h.Backend.GetAllGroup()
 		if val != nil {
 			log.Println("GetAllGroup:", val)
 		}
