@@ -41,15 +41,15 @@ func main() {
 	h := handler.NewHandler()
 	apiRoutes := r.Group("/api")
 	{
-		apiRoutes.GET("/users", h.FetchAllUsers())
-		apiRoutes.GET("/addUser", h.AddUserRoute())
-		apiRoutes.GET("/findUser", h.FindUserRoute())
-		apiRoutes.GET("/deleteUser", h.DeleteUserRoute())
+		apiRoutes.GET("/users", middleware.EnsureLoggedIn(), h.FetchAllUsers())
+		apiRoutes.GET("/addUser", middleware.EnsureLoggedIn(), h.AddUserRoute())
+		apiRoutes.GET("/findUser", middleware.EnsureLoggedIn(), h.FindUserRoute())
+		apiRoutes.GET("/deleteUser", middleware.EnsureLoggedIn(), h.DeleteUserRoute())
 
-		apiRoutes.GET("/groups", h.FetchAllGroups())
-		apiRoutes.GET("/addGroup", h.AddGroupRoute())
-		apiRoutes.GET("/findGroup", h.FindGroupRoute())
-		apiRoutes.GET("/deleteGroup", h.DeleteGroupRoute())
+		apiRoutes.GET("/groups", middleware.EnsureLoggedIn(), h.FetchAllGroups())
+		apiRoutes.GET("/addGroup", middleware.EnsureLoggedIn(), h.AddGroupRoute())
+		apiRoutes.GET("/findGroup", middleware.EnsureLoggedIn(), h.FindGroupRoute())
+		apiRoutes.GET("/deleteGroup", middleware.EnsureLoggedIn(), h.DeleteGroupRoute())
 	}
 
 	r.GET("/", handler.ShowIndexPage())

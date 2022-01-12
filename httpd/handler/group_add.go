@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"log"
 
 	"GO-GIN_REST_API/entity"
@@ -14,17 +15,18 @@ func (h *Handler) AddGroupRoute() gin.HandlerFunc {
 		groupId := c.Query("groupId")
 		door := c.Query("door")
 		group := c.Query("group")
-
-		err := h.Backend.SetGroup("b2:dm:group:"+groupId, &entity.Group{Group: group, GroupId: groupId, Door: door})
+		key := fmt.Sprintf("b2:dm:group:%s", groupId)
+		err := h.Backend.SetGroup(key, &entity.Group{Group: group, GroupId: groupId, Door: door})
 		if err != nil {
 			log.Println("SetGroup failed:", err)
 		} else {
 			c.JSON(200, gin.H{
-				"message": "新增Group成功",
-				"key":     "b2:dm:group:" + groupId,
-				"group":   group,
-				"groupId": groupId,
-				"door":    door,
+				"is_logged_in": c.MustGet("is_logged_in").(bool),
+				"message":      "新增Group成功",
+				"key":          "b2:dm:group:" + groupId,
+				"group":        group,
+				"groupId":      groupId,
+				"door":         door,
 			})
 		}
 	}

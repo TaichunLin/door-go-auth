@@ -1,7 +1,9 @@
 package middleware
 
 import (
+	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -30,10 +32,20 @@ func EnsureLoggedIn() gin.HandlerFunc {
 
 func SetUserStatus() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if token, err := c.Cookie("token"); err == nil || token != "" {
-			c.Set("is_logged_in", true)
-		} else {
+		token, err := c.Cookie("token")
+		if err != nil {
+			log.Println("err")
 			c.Set("is_logged_in", false)
+			return
+		}
+		log.Println("token:", token)
+		log.Println("err:", err)
+		if strings.Compare(token, "") == 0 {
+			log.Println("false")
+			c.Set("is_logged_in", false)
+		} else {
+			log.Println("true")
+			c.Set("is_logged_in", true)
 		}
 	}
 }

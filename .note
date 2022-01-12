@@ -1,4 +1,8 @@
-做一個認證模板
+GIN_tutorial(cookie login) 跟 door_go 的結合
+
+
+1\ token存入redis 
+2\ 人人都可以註冊...？
 
 
 https://chenyitian.gitbooks.io/gin-tutorials/content/
