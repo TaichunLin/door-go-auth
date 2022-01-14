@@ -5,6 +5,7 @@ import (
 	"GO-GIN_REST_API/httpd/handler"
 	"GO-GIN_REST_API/middleware"
 
+	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,6 +19,7 @@ func main() {
 	r := gin.Default()
 	r.Use(CORSMiddleware())
 	r.Use(middleware.SetUserStatus())
+	r.Use(sessions.Sessions("mysession", sessions.NewCookieStore([]byte("secret"))))
 
 	r.Static("/assets", "./templates/assets")
 	r.LoadHTMLGlob("templates/*.html")
@@ -25,9 +27,26 @@ func main() {
 	viewRoutes := r.Group("/view")
 	{
 		viewRoutes.GET("/user", middleware.EnsureLoggedIn(), func(c *gin.Context) {
+			/*
+				func getMenu(){
+					menu := redis.keys("b2door:menu:*")
+					var array = []Menu{}
+					for _, key := range menu{
+						item := strings.split(":")[2]
+						menuname := item.item
+
+						url := redis.get(key)
+						menuurl := url
+						append(array, Menu{name:menuname, url: menuurl})
+					}
+					return array
+				}
+			*/
+			// menu := getMenu(login or ...?)
 			c.HTML(200, "user.html", gin.H{
 				"is_logged_in": c.MustGet("is_logged_in").(bool),
 				"Title":        "會員管理",
+				// "Menu": menu []array{name, url}
 			})
 		})
 		viewRoutes.GET("/group", middleware.EnsureLoggedIn(), func(c *gin.Context) {
@@ -39,7 +58,7 @@ func main() {
 	}
 
 	h := handler.NewHandler()
-	apiRoutes := r.Group("/api")
+	apiRoutes := r.Group("/api").Use(auth.AuthRequired)
 	{
 		apiRoutes.GET("/users", middleware.EnsureLoggedIn(), h.FetchAllUsers())
 		apiRoutes.GET("/addUser", middleware.EnsureLoggedIn(), h.AddUserRoute())
@@ -55,6 +74,7 @@ func main() {
 	r.GET("/", handler.ShowIndexPage())
 
 	AuthRoutes := r.Group("/auth")
+
 	{
 		AuthRoutes.GET("/register", middleware.EnsureNotLoggedIn(), auth.ShowRegistrationPage)
 
@@ -62,6 +82,8 @@ func main() {
 		AuthRoutes.GET("/login", middleware.EnsureNotLoggedIn(), auth.ShowLoginPage)
 		AuthRoutes.POST("/login", middleware.EnsureNotLoggedIn(), auth.PerformLogin)
 		AuthRoutes.GET("/logout", middleware.EnsureLoggedIn(), auth.Logout)
+		// AuthRoutes.GET("/me", middleware.EnsureLoggedIn(), auth.Me)
+		// AuthRoutes.GET("/status", middleware.EnsureLoggedIn(), auth.Status)
 	}
 
 	r.Run(":1106")

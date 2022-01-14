@@ -3,13 +3,13 @@ package auth
 import (
 	"GO-GIN_REST_API/cache"
 	"GO-GIN_REST_API/entity"
+	b64 "encoding/base64"
 	"errors"
 	"log"
-	"math/rand"
 	"net/http"
-	"strconv"
 	"strings"
 
+	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
@@ -49,18 +49,23 @@ func ShowRegistrationPage(c *gin.Context) {
 }
 
 func Register(c *gin.Context) {
+	session := sessions.Default(c)
 	username := c.PostForm("username")
 	password := c.PostForm("password")
 
 	if _, err := RegisterNewUser(username, password); err == nil {
-		token := GenerateSessionToken()
+		token := b64.StdEncoding.EncodeToString([]byte("block2!secret?" + username))
 		c.SetCookie("token", token, 3600, "", "", false, true)
 		c.Set("is_logged_in", true)
 
-		err := redis.SetAuth("b2:dm:session:"+username, &entity.AuthUser{Username: username, Password: password})
+		err := redis.SetAuth("b2:dm:session:"+username, &entity.AuthUser{Username: username, Password: password, Token: token})
 		if err != nil {
 			log.Println("SetAuth failed:", err)
 		} else {
+			session.Set(token, username)
+			if err := session.Save(); err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save session"})
+			}
 			c.HTML(200, "login-successful.html", gin.H{
 				"is_logged_in": c.MustGet("is_logged_in").(bool),
 				"Title":        "Successful registration & Login",
@@ -74,15 +79,11 @@ func Register(c *gin.Context) {
 			"Title":        "Register",
 			"ErrorTitle":   "Registration Failed",
 			"ErrorMessage": err.Error()})
+
 	}
 }
 
-func GenerateSessionToken() string {
-	return strconv.FormatInt(rand.Int63(), 16)
-}
-
 func IsUserValid(username, password string) bool {
-
 	val := redis.GetAuth("b2:dm:session:" + username)
 	if val != nil {
 		if val.Username == username && val.Password == password {
@@ -90,7 +91,6 @@ func IsUserValid(username, password string) bool {
 		}
 	}
 	return false
-
 }
 
 func ShowLoginPage(c *gin.Context) {
@@ -101,17 +101,24 @@ func ShowLoginPage(c *gin.Context) {
 }
 
 func PerformLogin(c *gin.Context) {
+	session := sessions.Default(c)
 	username := c.PostForm("username")
 	password := c.PostForm("password")
 
 	if IsUserValid(username, password) {
-		token := GenerateSessionToken()
+
+		token := b64.StdEncoding.EncodeToString([]byte("block2!secret?"))
 		c.SetCookie("token", token, 3600, "", "", false, true)
 		c.Set("is_logged_in", true)
+		session.Set(token, username)
+		if err := session.Save(); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save session"})
+		}
 		c.HTML(200, "login-successful.html", gin.H{
 			"is_logged_in": c.MustGet("is_logged_in").(bool),
-			"Title":        "Successful Login",
+			"Title":        "Successful Login & Successfully authenticated user",
 		})
+
 	} else {
 		c.HTML(http.StatusBadRequest, "login.html", gin.H{
 			"is_logged_in": c.MustGet("is_logged_in").(bool),
@@ -122,6 +129,20 @@ func PerformLogin(c *gin.Context) {
 }
 
 func Logout(c *gin.Context) {
+	session := sessions.Default(c)
+	token := b64.StdEncoding.EncodeToString([]byte("block2!secret?"))
+	session.Delete(token)
+	session.Save()
 	c.SetCookie("token", "", -1, "", "", false, true)
 	c.Redirect(http.StatusTemporaryRedirect, "/")
+}
+
+func AuthRequired(c *gin.Context) {
+	session := sessions.Default(c)
+	user := session.Get(b64.StdEncoding.EncodeToString([]byte("block2!secret?")))
+	if user == nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	c.Next()
 }
