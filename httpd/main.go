@@ -3,9 +3,7 @@ package main
 import (
 	"GO-GIN_REST_API/auth"
 	"GO-GIN_REST_API/httpd/handler"
-	"GO-GIN_REST_API/middleware"
 
-	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,15 +16,13 @@ func main() {
 
 	r := gin.Default()
 	r.Use(CORSMiddleware())
-	r.Use(middleware.SetUserStatus())
-	r.Use(sessions.Sessions("mysession", sessions.NewCookieStore([]byte("secret"))))
 
 	r.Static("/assets", "./templates/assets")
 	r.LoadHTMLGlob("templates/*.html")
 
 	viewRoutes := r.Group("/view")
 	{
-		viewRoutes.GET("/user", middleware.EnsureLoggedIn(), func(c *gin.Context) {
+		viewRoutes.GET("/user", func(c *gin.Context) {
 			/*
 				func getMenu(){
 					menu := redis.keys("b2door:menu:*")
@@ -49,7 +45,7 @@ func main() {
 				// "Menu": menu []array{name, url}
 			})
 		})
-		viewRoutes.GET("/group", middleware.EnsureLoggedIn(), func(c *gin.Context) {
+		viewRoutes.GET("/group", func(c *gin.Context) {
 			c.HTML(200, "group.html", gin.H{
 				"is_logged_in": c.MustGet("is_logged_in").(bool),
 				"Title":        "部門管理",
@@ -58,17 +54,17 @@ func main() {
 	}
 
 	h := handler.NewHandler()
-	apiRoutes := r.Group("/api").Use(auth.AuthRequired)
+	apiRoutes := r.Group("/api")
 	{
-		apiRoutes.GET("/users", middleware.EnsureLoggedIn(), h.FetchAllUsers())
-		apiRoutes.GET("/addUser", middleware.EnsureLoggedIn(), h.AddUserRoute())
-		apiRoutes.GET("/findUser", middleware.EnsureLoggedIn(), h.FindUserRoute())
-		apiRoutes.GET("/deleteUser", middleware.EnsureLoggedIn(), h.DeleteUserRoute())
+		apiRoutes.GET("/users", h.FetchAllUsers())
+		apiRoutes.GET("/addUser", h.AddUserRoute())
+		apiRoutes.GET("/findUser", h.FindUserRoute())
+		apiRoutes.GET("/deleteUser", h.DeleteUserRoute())
 
-		apiRoutes.GET("/groups", middleware.EnsureLoggedIn(), h.FetchAllGroups())
-		apiRoutes.GET("/addGroup", middleware.EnsureLoggedIn(), h.AddGroupRoute())
-		apiRoutes.GET("/findGroup", middleware.EnsureLoggedIn(), h.FindGroupRoute())
-		apiRoutes.GET("/deleteGroup", middleware.EnsureLoggedIn(), h.DeleteGroupRoute())
+		apiRoutes.GET("/groups", h.FetchAllGroups())
+		apiRoutes.GET("/addGroup", h.AddGroupRoute())
+		apiRoutes.GET("/findGroup", h.FindGroupRoute())
+		apiRoutes.GET("/deleteGroup", h.DeleteGroupRoute())
 	}
 
 	r.GET("/", handler.ShowIndexPage())
@@ -76,14 +72,14 @@ func main() {
 	AuthRoutes := r.Group("/auth")
 
 	{
-		AuthRoutes.GET("/register", middleware.EnsureNotLoggedIn(), auth.ShowRegistrationPage)
+		AuthRoutes.GET("/register", auth.ShowRegistrationPage)
 
-		AuthRoutes.POST("/register", middleware.EnsureNotLoggedIn(), auth.Register)
-		AuthRoutes.GET("/login", middleware.EnsureNotLoggedIn(), auth.ShowLoginPage)
-		AuthRoutes.POST("/login", middleware.EnsureNotLoggedIn(), auth.PerformLogin)
-		AuthRoutes.GET("/logout", middleware.EnsureLoggedIn(), auth.Logout)
-		// AuthRoutes.GET("/me", middleware.EnsureLoggedIn(), auth.Me)
-		// AuthRoutes.GET("/status", middleware.EnsureLoggedIn(), auth.Status)
+		AuthRoutes.POST("/register", auth.Register)
+		AuthRoutes.GET("/login", auth.ShowLoginPage)
+		AuthRoutes.POST("/login", auth.PerformLogin)
+		AuthRoutes.GET("/logout", auth.Logout)
+		// AuthRoutes.GET("/me",  auth.Me)
+		// AuthRoutes.GET("/status",  auth.Status)
 	}
 
 	r.Run(":1106")
