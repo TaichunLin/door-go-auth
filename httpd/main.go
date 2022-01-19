@@ -1,8 +1,6 @@
 package main
 
 import (
-	"GO-GIN_REST_API/article"
-	"GO-GIN_REST_API/auth"
 	"GO-GIN_REST_API/httpd/handler"
 	"GO-GIN_REST_API/middleware"
 
@@ -18,23 +16,19 @@ func main() {
 
 	r := gin.Default()
 	r.Use(CORSMiddleware())
-	r.Use(middleware.SetUserStatus())
-
 	r.Static("/assets", "./templates/assets")
 	r.LoadHTMLGlob("templates/*.html")
 
 	viewRoutes := r.Group("/view")
 	{
-		viewRoutes.GET("/user", middleware.EnsureLoggedIn(), func(c *gin.Context) {
+		viewRoutes.GET("/user", middleware.TokenAuthMiddleware(), func(c *gin.Context) {
 			c.HTML(200, "user.html", gin.H{
-				"is_logged_in": c.MustGet("is_logged_in").(bool),
-				"Title":        "會員管理",
+				"Title": "會員管理",
 			})
 		})
-		viewRoutes.GET("/group", middleware.EnsureLoggedIn(), func(c *gin.Context) {
+		viewRoutes.GET("/group", middleware.TokenAuthMiddleware(), func(c *gin.Context) {
 			c.HTML(200, "group.html", gin.H{
-				"is_logged_in": c.MustGet("is_logged_in").(bool),
-				"Title":        "部門管理",
+				"Title": "部門管理",
 			})
 		})
 	}
@@ -42,37 +36,20 @@ func main() {
 	h := handler.NewHandler()
 	apiRoutes := r.Group("/api")
 	{
-		apiRoutes.GET("/users", h.FetchAllUsers())
-		apiRoutes.GET("/addUser", h.AddUserRoute())
-		apiRoutes.GET("/findUser", h.FindUserRoute())
-		apiRoutes.GET("/deleteUser", h.DeleteUserRoute())
+		apiRoutes.GET("/users", middleware.TokenAuthMiddleware(), h.FetchAllUsers())
+		apiRoutes.GET("/addUser", middleware.TokenAuthMiddleware(), h.AddUserRoute())
+		apiRoutes.GET("/findUser", middleware.TokenAuthMiddleware(), h.FindUserRoute())
+		apiRoutes.GET("/deleteUser", middleware.TokenAuthMiddleware(), h.DeleteUserRoute())
 
-		apiRoutes.GET("/groups", h.FetchAllGroups())
-		apiRoutes.GET("/addGroup", h.AddGroupRoute())
-		apiRoutes.GET("/findGroup", h.FindGroupRoute())
-		apiRoutes.GET("/deleteGroup", h.DeleteGroupRoute())
-	}
+		apiRoutes.GET("/groups", middleware.TokenAuthMiddleware(), h.FetchAllGroups())
+		apiRoutes.GET("/addGroup", middleware.TokenAuthMiddleware(), h.AddGroupRoute())
+		apiRoutes.GET("/findGroup", middleware.TokenAuthMiddleware(), h.FindGroupRoute())
+		apiRoutes.GET("/deleteGroup", middleware.TokenAuthMiddleware(), h.DeleteGroupRoute())
 
-	r.GET("/", article.ShowIndexPage)
-
-	AuthRoutes := r.Group("/auth")
-	{
-		AuthRoutes.GET("/register", middleware.EnsureNotLoggedIn(), auth.ShowRegistrationPage)
-
-		AuthRoutes.POST("/register", middleware.EnsureNotLoggedIn(), auth.Register)
-		AuthRoutes.GET("/login", middleware.EnsureNotLoggedIn(), auth.ShowLoginPage)
-		AuthRoutes.POST("/login", middleware.EnsureNotLoggedIn(), auth.PerformLogin)
-		AuthRoutes.GET("/logout", middleware.EnsureLoggedIn(), auth.Logout)
-	}
-
-	articleRoutes := r.Group("/article")
-	{
-
-		articleRoutes.GET("/view/:article_id", article.GetArticle)
-
-		articleRoutes.GET("/create", middleware.EnsureLoggedIn(), article.ShowArticleCreationPage)
-
-		articleRoutes.POST("/create", middleware.EnsureLoggedIn(), article.CreateArticle)
+		apiRoutes.POST("/login", h.Login())
+		apiRoutes.POST("/register", h.Register())
+		apiRoutes.POST("/logout", middleware.TokenAuthMiddleware(), h.Logout())
+		apiRoutes.POST("/token/refresh", h.Refresh())
 	}
 
 	r.Run(":1106")
