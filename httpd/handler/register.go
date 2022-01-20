@@ -27,16 +27,15 @@ func (h *Handler) Register() gin.HandlerFunc {
 		}
 		err := h.backend.CreateAuthen(`b2:dm:account:`+email, &entity.Accounts{Username: username, Password: pwd, Email: email})
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"CreateAuthen failede": err,
-			})
+			c.HTML(http.StatusBadRequest, "register.html", gin.H{
+				"ErrorTitle":   "Registration Failed",
+				"ErrorMessage": err.Error()})
 			return
 		} else {
-			c.JSON(200, gin.H{
-				"message":  "新增anth會員成功",
-				"username": username,
-				"Email":    email,
-				"password": password,
+			c.HTML(200, "login-successful.html", gin.H{
+				"Title":       "registered",
+				"DoSomething": "Please log in.",
+				"Username":    username,
 			})
 		}
 	}

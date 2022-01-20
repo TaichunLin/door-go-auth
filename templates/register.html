@@ -1,37 +1,60 @@
 {{ template "header.html" .}}
-
-<h1>{{ .Title}}</h1>
-
-<div class="panel panel-default col-sm-6">
-  <div class="panel-body">
-    {{ if .ErrorTitle}}
-    <p class="bg-danger">{{.ErrorTitle}}: {{.ErrorMessage}}</p>
-    {{end}}
-
-    <form class="form" action="/auth/register" method="POST">
-      <div class="form-group">
-        <label for="username">Username</label>
-        <input
-          type="text"
-          class="form-control"
-          id="username"
-          name="username"
-          placeholder="Username"
-        />
+<body class="container">
+  <nav class="navbar navbar-default">
+    <div class="container">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="/"> Home </a>
       </div>
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input
-          type="password"
-          name="password"
-          class="form-control"
-          id="password"
-          placeholder="Password"
-        />
-      </div>
-      <button type="submit" class="btn btn-primary">{{ .Title}}</button>
-    </form>
+      <ul class="nav navbar-nav">
+        <li><a href="/auth/registerPage">Register</a></li>
+        <li><a href="/auth/loginPage">Login</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <h1>{{ .Title}}</h1>
+
+  <div class="panel panel-default col-sm-6">
+    <div class="panel-body">
+      {{ if .ErrorTitle}}
+      <p class="bg-danger">{{.ErrorTitle}}: {{.ErrorMessage}}</p>
+      {{end}}
+
+      <form class="form" action="/auth/register" method="POST">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input
+            type="text"
+            class="form-control"
+            id="username"
+            name="username"
+            placeholder="Username"
+          />
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input
+            type="email"
+            name="email"
+            class="form-control"
+            id="email"
+            placeholder="xxx@gmail.com"
+          />
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input
+            type="password"
+            name="password"
+            class="form-control"
+            id="password"
+            placeholder="Password"
+          />
+        </div>
+        <button type="submit" class="btn btn-primary">{{ .Title}}</button>
+      </form>
+    </div>
   </div>
-</div>
 
-{{ template "footer.html" .}}
+  {{ template "footer.html" .}}
+</body>

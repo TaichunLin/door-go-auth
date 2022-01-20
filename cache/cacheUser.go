@@ -1,11 +1,10 @@
 package cache
 
 import (
+	"GO-GIN_REST_API/entity"
 	"context"
 	"encoding/json"
 	"log"
-
-	"GO-GIN_REST_API/entity"
 )
 
 func (r *RedisClient) GetAllUsers() []*entity.UserList {

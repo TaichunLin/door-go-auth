@@ -15,9 +15,13 @@ import (
 func main() {
 
 	r := gin.Default()
-	r.Use(CORSMiddleware())
+	r.Use(middleware.CORSMiddleware())
 	r.Static("/assets", "./templates/assets")
 	r.LoadHTMLGlob("templates/*.html")
+	h := handler.NewHandler()
+	r.GET("/", func(c *gin.Context) {
+		c.HTML(200, "index.html", nil)
+	})
 
 	viewRoutes := r.Group("/view")
 	{
@@ -33,7 +37,29 @@ func main() {
 		})
 	}
 
-	h := handler.NewHandler()
+	AuthRoutes := r.Group("/auth")
+	{
+		//ShowRegistrationPage
+		AuthRoutes.GET("/registerPage", func(c *gin.Context) {
+			c.HTML(200, "register.html", gin.H{
+				"Title": "Register",
+			})
+		})
+		AuthRoutes.GET("/loginSuccess", h.LoginSuccess())
+
+		AuthRoutes.POST("/register", h.Register())
+
+		//ShowLoginPage
+		AuthRoutes.GET("/loginPage", func(c *gin.Context) {
+			c.HTML(200, "login.html", gin.H{
+				"Title": "Login",
+			})
+		})
+		AuthRoutes.POST("/login", h.Login())
+		AuthRoutes.GET("/logout", middleware.TokenAuthMiddleware(), h.Logout())
+		AuthRoutes.POST("/token/refresh", h.Refresh())
+	}
+
 	apiRoutes := r.Group("/api")
 	{
 		apiRoutes.GET("/users", middleware.TokenAuthMiddleware(), h.FetchAllUsers())
@@ -45,29 +71,8 @@ func main() {
 		apiRoutes.GET("/addGroup", middleware.TokenAuthMiddleware(), h.AddGroupRoute())
 		apiRoutes.GET("/findGroup", middleware.TokenAuthMiddleware(), h.FindGroupRoute())
 		apiRoutes.GET("/deleteGroup", middleware.TokenAuthMiddleware(), h.DeleteGroupRoute())
-
-		apiRoutes.POST("/login", h.Login())
-		apiRoutes.POST("/register", h.Register())
-		apiRoutes.POST("/logout", middleware.TokenAuthMiddleware(), h.Logout())
-		apiRoutes.POST("/token/refresh", h.Refresh())
 	}
 
 	r.Run(":1106")
 
-}
-
-func CORSMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
-
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(204)
-			return
-		}
-
-		c.Next()
-	}
 }

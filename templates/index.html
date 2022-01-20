@@ -1,7 +1,21 @@
 {{ template "header.html" .}}
-<br />
-<h3 style="color: grey">Welcome!</h3>
-<br />
-<h1>中東館門禁系統管理</h1>
-<h1>Block2 ｜Access control system</h1>
-{{ template "footer.html" .}}
+<body class="container">
+  <nav class="navbar navbar-default">
+    <div class="container">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="/"> Home </a>
+      </div>
+      <ul class="nav navbar-nav">
+        <li><a href="/auth/registerPage">Register</a></li>
+        <li><a href="/auth/loginPage">Login</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <br />
+  <h3 style="color: grey">Welcome!</h3>
+  <br />
+  <h1>中東館門禁系統管理</h1>
+  <h1>Block2 ｜Access control system</h1>
+  {{ template "footer.html" .}}
+</body>

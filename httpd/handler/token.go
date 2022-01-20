@@ -2,11 +2,7 @@ package handler
 
 import (
 	"GO-GIN_REST_API/entity"
-	"fmt"
-	"log"
-	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -63,67 +59,67 @@ func CreateToken(email string) (*entity.TokenMetadata, error) {
 	return tm, nil
 }
 
-//extract the token from the request header
-//exsist?
-func ExtractToken(r *http.Request) string {
-	bearToken := r.Header.Get("Authorization")
-	//normally Authorization the_token_xxx
-	strArr := strings.Split(bearToken, " ")
-	log.Println("ExtractToken.strArr: ", strArr)
-	if len(strArr) == 2 {
-		return strArr[1]
-	}
-	return ""
-}
+// //extract the token from the request header
+// //exsist?
+// func ExtractToken(r *http.Request) string {
+// 	bearToken := r.Header.Get("Authorization")
+// 	//normally Authorization the_token_xxx
+// 	strArr := strings.Split(bearToken, " ")
+// 	log.Println("ExtractToken.strArr: ", strArr)
+// 	if len(strArr) == 2 {
+// 		return strArr[1]
+// 	}
+// 	return ""
+// }
 
-//verity?
-func VerifyToken(r *http.Request) (*jwt.Token, error) {
-	tokenString := ExtractToken(r)
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		//Make sure that the token method conform to "SigningMethodHMAC"
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return []byte(os.Getenv("ACCESS_SECRET")), nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	log.Println("VerifyToken.token: ", token)
-	return token, nil
-}
+// //verity?
+// func VerifyToken(r *http.Request) (*jwt.Token, error) {
+// 	tokenString := ExtractToken(r)
+// 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+// 		//Make sure that the token method conform to "SigningMethodHMAC"
+// 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+// 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+// 		}
+// 		return []byte(os.Getenv("ACCESS_SECRET")), nil
+// 	})
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	log.Println("VerifyToken.token: ", token)
+// 	return token, nil
+// }
 
 //expired?valid?
-func TokenValid(r *http.Request) error {
-	token, err := VerifyToken(r)
-	if err != nil {
-		return err
-	}
-	if _, ok := token.Claims.(jwt.MapClaims); !ok && !token.Valid {
-		return err
-	}
-	return nil
-}
+// func TokenValid(r *http.Request) error {
+// 	token, err := VerifyToken(r)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	if _, ok := token.Claims.(jwt.MapClaims); !ok && !token.Valid {
+// 		return err
+// 	}
+// 	return nil
+// }
 
 //extract the token metadata that will lookup in Redis
-func ExtractTokenMetadata(r *http.Request) (*entity.AccessDetails, error) {
-	token, err := VerifyToken(r)
-	if err != nil {
-		return nil, err
-	}
-	claims, ok := token.Claims.(jwt.MapClaims)
+// func ExtractTokenMetadata(r *http.Request) (*entity.AccessDetails, error) {
+// 	token, err := VerifyToken(r)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	claims, ok := token.Claims.(jwt.MapClaims)
 
-	if ok && token.Valid {
-		accessUuid, ok := claims["access_uuid"].(string)
-		if !ok {
-			return nil, err
-		}
-		email := claims["email"].(string)
+// 	if ok && token.Valid {
+// 		accessUuid, ok := claims["access_uuid"].(string)
+// 		if !ok {
+// 			return nil, err
+// 		}
+// 		email := claims["email"].(string)
 
-		return &entity.AccessDetails{
-			AccessUuid: accessUuid,
-			Email:      email,
-		}, nil
-	}
-	return nil, err
-}
+// 		return &entity.AccessDetails{
+// 			AccessUuid: accessUuid,
+// 			Email:      email,
+// 		}, nil
+// 	}
+// 	return nil, err
+// }

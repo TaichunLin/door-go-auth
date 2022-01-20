@@ -1,30 +1,33 @@
 {{ template "header.html" .}}
+<body class="container">
+  {{ template "menu.html" .}}
 
-<h2>{{ .Title }}</h2>
+  <h2>{{ .Title }}</h2>
 
-<button type="button" class="myBtn add addBtn">新增</button>
+  <button type="button" class="myBtn add addBtn">新增</button>
 
-<div id="myModal" class="modal">
-  <div class="modal-content">
-    <span class="close">&times;</span>
-    <table>
-      <tr>
-        <h2 id="editlabel"></h2>
-      </tr>
-      <tr>
-        username:
-        <input type="text" id="username" placeholder="username" required />
-        cardId:
-        <input type="text" id="cardId" placeholder="cardId" required />
-        groupId:
-        <input type="text" id="groupId" placeholder="groupId" required />
-        <input type="button" class="add-row" value="" />
-      </tr>
-    </table>
+  <div id="myModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <table>
+        <tr>
+          <h2 id="editlabel"></h2>
+        </tr>
+        <tr>
+          username:
+          <input type="text" id="username" placeholder="username" required />
+          cardId:
+          <input type="text" id="cardId" placeholder="cardId" required />
+          groupId:
+          <input type="text" id="groupId" placeholder="groupId" required />
+          <input type="button" class="add-row" value="" />
+        </tr>
+      </table>
+    </div>
   </div>
-</div>
 
-<table id="tb"></table>
-<button type="button" class="delete-row">刪除</button>
-<script src="../assets/js/user.js"></script>
-{{ template "footer.html" .}}
+  <table id="tb"></table>
+  <button type="button" class="delete-row">刪除</button>
+  <script src="../assets/js/user.js"></script>
+  {{ template "footer.html" .}}
+</body>

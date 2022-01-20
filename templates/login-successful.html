@@ -1,4 +1,9 @@
-{{ template "header.html" .}} {{ .Title }}
-<div>You have successfully logged in.</div>
+{{ template "header.html" .}}
+<body class="container">
+  {{ template "menu.html" .}}
 
-{{ template "footer.html" .}}
+  <div>You have successfully {{ .Title }}.</div>
+  <h1>{{ .DoSomething }}</h1>
+  <div>Welcome {{ .Username }} :).</div>
+  {{ template "footer.html" .}}
+</body>

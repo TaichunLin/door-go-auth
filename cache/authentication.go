@@ -32,7 +32,7 @@ func (r *RedisClient) FetchAuthen(key string) *entity.Accounts {
 	return &user
 }
 
-//需要刪除會員嗎...
+//刪除會員嗎...
 // func (r *RedisClient) DeleteAuthen(key string) error {
 // 	ctx := context.Background()
 // 	err := r.Client.Del(ctx, key).Err()
