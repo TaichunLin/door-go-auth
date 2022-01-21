@@ -1,4 +1,15 @@
-做一個認證模板
+GIN_tutorial(cookie login) 跟 door_go 的結合
+
+
+1\ 整合進html
+2\ 前台不放“註冊”連結，讓後台處理“註冊”...？
+3\ menu變動態（才不用一直重啟後端）
+4\加refersh按鍵？ 那就也要在頁面上加上倒數計時器？也放進cookie?
+
+
+
+
+CSRF
 
 
 https://chenyitian.gitbooks.io/gin-tutorials/content/

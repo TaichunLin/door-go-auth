@@ -1,6 +1,10 @@
 package handler
 
-import "GO-GIN_REST_API/cache"
+import (
+	"GO-GIN_REST_API/cache"
+
+	"github.com/gin-gonic/gin"
+)
 
 type Handler struct {
 	backend *cache.RedisClient
@@ -13,4 +17,20 @@ func NewHandler() *Handler {
 		panic(err)
 	}
 	return &Handler{backend: redis}
+}
+
+func Html(c *gin.Context, http int, url string, title string, detail string, detail2 string) {
+	c.HTML(http, url, gin.H{
+		"Title":   title,
+		"Detail":  detail,
+		"Detail2": detail2,
+	})
+}
+
+func ErrorHtml(c *gin.Context, url string, title string, errorTitle string, errorMessage string) {
+	c.HTML(401, url, gin.H{
+		"Title":        title,
+		"ErrorTitle":   errorTitle,
+		"ErrorMessage": errorMessage,
+	})
 }

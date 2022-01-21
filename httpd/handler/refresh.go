@@ -3,82 +3,74 @@ package handler
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
 
-func (h *Handler) Refresh() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		mapToken := map[string]string{}
-		if err := c.ShouldBindJSON(&mapToken); err != nil {
-			c.JSON(http.StatusUnprocessableEntity, err.Error())
-			return
-		}
-
-		refreshToken := mapToken["refresh_token"]
-
-		//verify the token
-
-		//os.Setenv("REFRESH_SECRET", "mcmvmkmsdnfsdmfdsjf")
-		token, err := jwt.Parse(refreshToken, func(token *jwt.Token) (interface{}, error) {
+func (h *Handler) Refresh(c *gin.Context) {
+	tokenString, err := c.Cookie("refresh")
+	log.Println("tokenString: ", tokenString)
+	if err == nil && tokenString != "" {
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 			}
 			return []byte(os.Getenv("REFRESH_SECRET")), nil
 		})
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, "Refresh token expired")
+			ErrorHtml(c, "login.html", "Login", "Refresh failed 1 ", err.Error())
+			log.Println("refresh token: ", token)
 			return
 		}
-
-		//is token valid?
 		if _, ok := token.Claims.(jwt.MapClaims); !ok && !token.Valid {
-			c.JSON(http.StatusUnauthorized, err)
+			ErrorHtml(c, "login.html", "Login", "Refresh failed 2 ", err.Error())
 			return
 		}
 
 		//Since token is valid, get the uuid:
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if ok && token.Valid {
+			log.Println("claims: ", claims)
+
 			refreshUuid, ok := claims["refresh_uuid"].(string) //convert the interface to string
 			if !ok {
-				c.JSON(http.StatusUnprocessableEntity, err)
+				ErrorHtml(c, "login.html", "Login", "Refresh failed 3 ", err.Error())
 				return
 			}
-			email := claims["email"].(string)
-			log.Println("********  refreshUuid  *********")
-			log.Println(refreshUuid)
-			log.Println("********  email  *********")
-			log.Println(email)
-			//Delete the previous Refresh Token
-			deleted, delErr := h.backend.DeleteAuthor(`jwtMetadata:RefreshUuid:` + refreshUuid)
-			if delErr != nil || deleted == 0 {
-				c.JSON(http.StatusUnauthorized, "unauthorized")
+			if deleted, delErr := h.backend.DeleteAuthor(`jwtMetadata:RefreshUuid:` + refreshUuid); delErr != nil || deleted == 0 {
+				ErrorHtml(c, "login.html", "Login", "Refresh failed 4 ", "Unauthorized")
 				return
 			}
 			//Create new pairs of refresh and access tokens
+			c.SetCookie("token", "", -1, "", "", false, true)
+			c.SetCookie("refresh", "", -1, "", "", false, true)
 
+			email := claims["email"].(string)
 			tokens, createErr := CreateToken(email)
 			if createErr != nil {
-				c.JSON(http.StatusForbidden, createErr.Error())
-				return
-			}
-			//save the tokens metadata to redis
-			saveErr := h.backend.CreateAuthor(email, tokens)
-			if saveErr != nil {
-				c.JSON(http.StatusForbidden, saveErr.Error())
+				ErrorHtml(c, "login.html", "Login", "Refresh failed", createErr.Error())
 				return
 			}
 
-			c.JSON(http.StatusCreated, gin.H{
-				"access_token":  tokens.AccessToken,
-				"refresh_token": tokens.RefreshToken,
-			})
+			if saveErr := h.backend.CreateAuthor(email, tokens); saveErr != nil {
+				ErrorHtml(c, "login.html", "Login", "Refresh failed 5 ", saveErr.Error())
+				return
+			}
+			log.Print("access_token: ", tokens.AccessToken)
+			log.Print("refresh_token: ", tokens.RefreshToken)
+			c.SetCookie("token", tokens.AccessToken, 900, "", "", false, true)
+			c.SetCookie("refresh", tokens.RefreshToken, 86400, "", "", false, true)
+			username := h.backend.FetchAuthen("b2:dm:account:" + email).Username
+			Html(c, 200, "text.html", `You have successfully refreshed!`, `You can keeping search things`, `Welcome again,`+username)
 		} else {
-			c.JSON(http.StatusUnauthorized, "refresh expired")
+			ErrorHtml(c, "login.html", "Login", "Refresh failed 6 ", "refresh has expired. Please log in.")
+
 		}
+		return
+	} else {
+		ErrorHtml(c, "login.html", "Login", "Refresh failed 7 ", err.Error())
 	}
+
 }

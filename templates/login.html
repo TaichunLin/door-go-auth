@@ -8,6 +8,7 @@
       <ul class="nav navbar-nav">
         <li><a href="/auth/registerPage">Register</a></li>
         <li><a href="/auth/loginPage">Login</a></li>
+        <li><a href="/auth/token/refresh">refreshToken</a></li>
       </ul>
     </div>
   </nav>
@@ -21,16 +22,6 @@
       {{end}}
 
       <form class="form" action="/auth/login" method="POST">
-        <div class="form-group">
-          <label for="username">Username</label>
-          <input
-            type="text"
-            class="form-control"
-            id="username"
-            name="username"
-            placeholder="Username"
-          />
-        </div>
         <div class="form-group">
           <label for="email">Email</label>
           <input

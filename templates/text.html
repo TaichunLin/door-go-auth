@@ -1,0 +1,12 @@
+{{ template "header.html" .}}
+<body class="container">
+  {{ template "menu.html" .}} {{ if .ErrorTitle}}
+  <p class="bg-danger">{{.ErrorTitle}}: {{.ErrorMessage}}</p>
+  {{end}}
+
+  <h1>{{ .Title }}</h1>
+  <div>{{ .Detail }}</div>
+  <div>{{ .Detail2 }}</div>
+
+  {{ template "footer.html" .}}
+</body>

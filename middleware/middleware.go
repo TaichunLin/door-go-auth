@@ -1,9 +1,9 @@
 package middleware
 
 import (
+	"GO-GIN_REST_API/httpd/handler"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 
 	"github.com/dgrijalva/jwt-go"
@@ -21,26 +21,29 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 		log.Println("tokenString: ", tokenString)
 		if err == nil && tokenString != "" {
 
-			token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-
+			val, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-
 					return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-
 				}
 				return []byte(os.Getenv("ACCESS_SECRET")), nil
-
 			})
-			log.Println("token: ", token)
-			if _, ok := token.Claims.(jwt.MapClaims); !ok && !token.Valid {
-				c.JSON(http.StatusUnauthorized, err.Error())
+			fmt.Printf("%#v	\n", val)
+			log.Println("val: ", val)
+			log.Println("err: ", err)
+			if _, ok := val.Claims.(jwt.MapClaims); !ok && !val.Valid {
+				handler.ErrorHtml(c, "text.html", "Unauthorized", "something wrong 2 ", err.Error())
 				return
 			}
 			c.Next()
 		} else {
-			c.JSON(http.StatusUnauthorized, err.Error())
+			handler.ErrorHtml(c, "text.html", "Unauthorized", "something wrong 3 ", err.Error())
 			c.Abort()
 		}
+		//get client method
+		// switch method {
+		// case "addgroup":
+		// 	models.addgroup(...)
+		// }
 	}
 }
 
