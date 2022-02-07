@@ -4,10 +4,13 @@ import (
 	"GO-GIN_REST_API/httpd/handler"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
+	"strings"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/justinas/nosurf"
 )
 
 // var (
@@ -47,18 +50,55 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 	}
 }
 
+func noSurf(next http.Handler) http.Handler {
+	csrfHandler := nosurf.New(next)
+	csrfHandler.SetBaseCookie(http.Cookie{
+		HttpOnly: true,
+		Path:     "/",
+		Secure:   false,
+	})
+	return csrfHandler
+}
+
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
-		c.Writer.Header().Set("Authorization", "")
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)
 			return
 		}
 
 		c.Next()
+	}
+}
+
+func CustomCors() gin.HandlerFunc {
+	var allowedMethods = []string{
+		"POST",
+		"GET",
+		"OPTIONS",
+		"PUT",
+		"PATCH",
+		"DELETE",
+	}
+	return func(c *gin.Context) {
+		origin := c.Request.Header.Get("Origin")
+		fmt.Println("origin: ", origin)
+		c.Header("Access-Control-Allow-Origin", origin)
+		c.Header("Access-Control-Allow-Credentials", "true")
+
+		if c.Request.Method == "OPTIONS" {
+			c.Writer.Header().Set(
+				"Access-Control-Allow-Methods",
+				strings.Join(allowedMethods, ", "),
+			)
+			c.Writer.Header().Set(
+				"Access-Control-Allow-Headers",
+				c.Request.Header.Get("Access-Control-Request-Headers"),
+			)
+		}
 	}
 }
