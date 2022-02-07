@@ -4,6 +4,7 @@ import (
 	"GO-GIN_REST_API/cache"
 
 	"github.com/gin-gonic/gin"
+	"github.com/justinas/nosurf"
 )
 
 type Handler struct {
@@ -21,9 +22,10 @@ func NewHandler() *Handler {
 
 func Html(c *gin.Context, http int, url string, title string, detail string, detail2 string) {
 	c.HTML(http, url, gin.H{
-		"Title":   title,
-		"Detail":  detail,
-		"Detail2": detail2,
+		"Title":      title,
+		"Detail":     detail,
+		"Detail2":    detail2,
+		"csrf_token": nosurf.Token(c.Request),
 	})
 }
 
@@ -32,5 +34,6 @@ func ErrorHtml(c *gin.Context, url string, title string, errorTitle string, erro
 		"Title":        title,
 		"ErrorTitle":   errorTitle,
 		"ErrorMessage": errorMessage,
+		"csrf_token":   nosurf.Token(c.Request),
 	})
 }

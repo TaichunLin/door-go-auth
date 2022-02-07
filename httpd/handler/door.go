@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/justinas/nosurf"
 )
 
 func (h *Handler) FetchAllRoute(x string) gin.HandlerFunc {
@@ -40,11 +41,12 @@ func (h *Handler) AddRoute(x string) gin.HandlerFunc {
 				log.Println("SetGroup failed:", err)
 			} else {
 				c.JSON(200, gin.H{
-					"message": "新增Group成功",
-					"key":     "b2:dm:group:" + groupId,
-					"group":   group,
-					"groupId": groupId,
-					"door":    door,
+					"message":    "新增Group成功",
+					"key":        "b2:dm:group:" + groupId,
+					"group":      group,
+					"groupId":    groupId,
+					"door":       door,
+					"csrf_token": nosurf.Token(c.Request),
 				})
 			}
 
@@ -64,12 +66,13 @@ func (h *Handler) AddRoute(x string) gin.HandlerFunc {
 				log.Println("SetUser failed:", err)
 			} else {
 				c.JSON(200, gin.H{
-					"message":  "新增User成功",
-					"key":      "b2:dm:user:" + cardId,
-					"username": username,
-					"cardId":   cardId,
-					"group":    group,
-					"groupId":  groupId,
+					"message":    "新增User成功",
+					"key":        "b2:dm:user:" + cardId,
+					"username":   username,
+					"cardId":     cardId,
+					"group":      group,
+					"groupId":    groupId,
+					"csrf_token": nosurf.Token(c.Request),
 				})
 			}
 		}
@@ -89,8 +92,9 @@ func (h *Handler) DeleteRoute(x string) gin.HandlerFunc {
 			} else {
 
 				c.JSON(200, gin.H{
-					"message": "刪除User成功",
-					"cardId":  cardId,
+					"message":    "刪除User成功",
+					"cardId":     cardId,
+					"csrf_token": nosurf.Token(c.Request),
 				})
 			}
 		case "group":
@@ -103,8 +107,9 @@ func (h *Handler) DeleteRoute(x string) gin.HandlerFunc {
 			} else {
 
 				c.JSON(200, gin.H{
-					"message": "刪除Group成功",
-					"groupId": groupId,
+					"message":    "刪除Group成功",
+					"groupId":    groupId,
+					"csrf_token": nosurf.Token(c.Request),
 				})
 			}
 		}
