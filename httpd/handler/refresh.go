@@ -62,11 +62,9 @@ func (h *Handler) Refresh(c *gin.Context) {
 			log.Print("refresh_token: ", tokens.RefreshToken)
 			c.SetCookie("token", tokens.AccessToken, 900, "", "", false, true)
 			c.SetCookie("refresh", tokens.RefreshToken, 86400, "", "", false, true)
-			username := h.backend.FetchAuthen("b2:dm:account:" + email).Username
-			Html(c, 200, "text.html", `You have successfully refreshed!`, `You can keeping search things`, `Welcome again,`+username)
+			log.Println("Successfully refreshed again!!")
 		} else {
 			ErrorHtml(c, "login.html", "Login", "Refresh failed 6 ", "refresh has expired. Please log in.")
-
 		}
 		return
 	} else {

@@ -39,9 +39,16 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 			}
 			c.Next()
 		} else {
-			handler.ErrorHtml(c, "text.html", "Unauthorized", "something wrong 3 ", err.Error())
-			c.Abort()
+			refresh, err := c.Cookie("refresh")
+			switch refresh != "" {
+			case true:
+				c.Redirect(http.StatusFound, "/auth/token/refresh")
+			case false:
+				handler.ErrorHtml(c, "text.html", "Unauthorized", "something wrong 3 ", err.Error())
+				c.Abort()
+			}
 		}
+
 		//get client method
 		// switch method {
 		// case "addgroup":
