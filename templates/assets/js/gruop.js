@@ -107,3 +107,22 @@ let FetchDel = (groupId) => {
   fetch(`http://localhost:1106/api/deleteGroup?groupId=${groupId}`);
   FetchGetAll();
 };
+
+// var csrf_token = document
+//   .querySelector("meta[http-equiv='csrf-token']")
+//   .getAttribute("content");
+
+// function csrfSafeMethod(method) {
+//   // these HTTP methods do not require CSRF protection
+//   return /^(GET|HEAD|OPTIONS)$/.test(method);
+// }
+// var o = XMLHttpRequest.prototype.open;
+
+// XMLHttpRequest.prototype.open = function () {
+//   var res = o.apply(this, arguments);
+//   var err = new Error();
+//   if (!csrfSafeMethod(arguments[0])) {
+//     this.setRequestHeader("X-CSRF-Token", csrf_token);
+//   }
+//   return res;
+// };

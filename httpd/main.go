@@ -83,3 +83,13 @@ func main() {
 func csrfFailHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%s\n", nosurf.Reason(r))
 }
+
+// func noSurf(next http.Handler) http.Handler {
+// 	csrfHandler := nosurf.New(next)
+// 	csrfHandler.SetBaseCookie(http.Cookie{
+// 		HttpOnly: true,
+// 		Path:     "/",
+// 		Secure:   false,
+// 	})
+// 	return csrfHandler
+// }

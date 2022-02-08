@@ -36,7 +36,7 @@ func (h *Handler) AddRoute(x string) gin.HandlerFunc {
 			door := c.Query("door")
 			group := c.Query("group")
 
-			err := h.backend.SetGroup("b2:dm:group:"+groupId, &entity.Group{Group: group, GroupId: groupId, Door: door})
+			err := h.backend.Set("b2:dm:group:"+groupId, &entity.Group{Group: group, GroupId: groupId, Door: door})
 			if err != nil {
 				log.Println("SetGroup failed:", err)
 			} else {
@@ -60,7 +60,7 @@ func (h *Handler) AddRoute(x string) gin.HandlerFunc {
 			door := h.backend.GetGroup("b2:dm:group:" + groupId).Door
 			log.Println("Get User's Group:", group)
 
-			err := h.backend.SetUser("b2:dm:user:"+cardId, &entity.User{Username: username, GroupId: &entity.Group{GroupId: groupId, Group: group, Door: door}, CardId: cardId})
+			err := h.backend.Set("b2:dm:user:"+cardId, &entity.User{Username: username, GroupId: &entity.Group{GroupId: groupId, Group: group, Door: door}, CardId: cardId})
 
 			if err != nil {
 				log.Println("SetUser failed:", err)

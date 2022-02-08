@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/dgrijalva/jwt-go"
@@ -63,6 +64,7 @@ func (h *Handler) Refresh(c *gin.Context) {
 			c.SetCookie("token", tokens.AccessToken, 900, "", "", false, true)
 			c.SetCookie("refresh", tokens.RefreshToken, 86400, "", "", false, true)
 			log.Println("Successfully refreshed again!!")
+			c.Redirect(http.StatusFound, "/view/user")
 		} else {
 			ErrorHtml(c, "login.html", "Login", "Refresh failed 6 ", "refresh has expired. Please log in.")
 		}
