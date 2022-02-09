@@ -21,11 +21,19 @@ func NewHandler() *Handler {
 }
 
 func Html(c *gin.Context, http int, url string, title string, detail string, detail2 string) {
+	c.Writer.Header().Set("X-CSRF-Token", nosurf.Token(c.Request))
+
 	c.HTML(http, url, gin.H{
 		"Title":      title,
 		"Detail":     detail,
 		"Detail2":    detail2,
 		"csrf_token": nosurf.Token(c.Request),
+		// "_gorilla_csrf":  csrf.Token(c.Request),
+		// csrf.TemplateTag: csrf.TemplateField(c.Request),
+		// "_gorilla_csrf":  csrf.TemplateField(c.Request),
+		// "_csrfField":     csrf.TemplateField(c.Request),
+		// "csrfField":      csrf.TemplateField(c.Request),
+		// "csrfField": csrf.Token(c.Request),
 	})
 }
 

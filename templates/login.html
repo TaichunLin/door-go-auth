@@ -22,6 +22,14 @@
 
       <form class="form" action="/auth/login" method="POST">
         <input type="hidden" name="csrf_token" value="{{ .csrf_token }}" />
+        <!-- <input type="hidden" name="csrfField" value="{{ .csrfField }} " /> -->
+        <!-- <input
+          type="hidden"
+          name="gorilla.csrf.Token"
+          value="{{ .csrfField }} "
+        /> -->
+        <!-- <input type="hidden" name="csrf_token" value="{{ .csrfField }} " /> -->
+
         <div class="form-group">
           <label for="email">Email</label>
           <input

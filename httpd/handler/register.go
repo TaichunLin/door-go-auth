@@ -21,7 +21,7 @@ func (h *Handler) Register(c *gin.Context) {
 	} else if h.SameAccount(email) {
 		ErrorHtml(c, "register.html", "Register", "Registration Failed", "the email isn't available or have already exist.")
 	} else {
-		err := h.backend.CreateAuthen(`b2:dm:account:`+email, &entity.Accounts{Username: username, Password: pwd, Email: email})
+		err := h.backend.Set(`b2:dm:account:`+email, &entity.Accounts{Username: username, Password: pwd, Email: email})
 		if err != nil {
 			ErrorHtml(c, "register.html", "Register", "Registration Failed", err.Error())
 		} else {

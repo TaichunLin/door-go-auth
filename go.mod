@@ -8,6 +8,8 @@ require (
 	github.com/gin-gonic/nosurf v0.0.0-20150415101651-45adcfcaf706
 	github.com/go-playground/validator/v10 v10.9.0 // indirect
 	github.com/go-redis/redis/v8 v8.11.4
+	github.com/gorilla/csrf v1.7.1 // indirect
+	github.com/gwatts/gin-adapter v0.0.0-20170508204228-c44433c485ad // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/justinas/nosurf v1.1.1
 	github.com/mattn/go-isatty v0.0.14 // indirect

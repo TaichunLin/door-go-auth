@@ -13,9 +13,9 @@ import (
 type Todb interface {
 	GetAllGroup() []*entity.Group
 	GetAllUsers() []*entity.UserList
-	Set(key string, value interface{}) error
 	GetGroup(key string) *entity.Group
 	GetUser(key string) *entity.UserList
+	Set(key string, value interface{}) error
 	Del(key string) error
 }
 

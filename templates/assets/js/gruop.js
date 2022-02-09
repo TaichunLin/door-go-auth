@@ -66,6 +66,9 @@ $(document).ready(() => {
     }
     modal.css("display", "block");
   });
+
+  let csrfToken = document.getElementsByName("gorilla.csrf.Token")[0].value;
+  console.log(csrfToken);
 });
 
 let FetchGetAll = () => {
