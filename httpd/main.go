@@ -21,10 +21,8 @@ func main() {
 	r := gin.Default()
 	r.Use(middleware.CORSMiddleware())
 	//========nosurf========
-	csrf := nosurf.New(r)
-	csrf.SetFailureHandler(http.HandlerFunc(csrfFailHandler))
-
-	// r.Use(CSRF())
+	// csrf := nosurf.New(r)
+	// csrf.SetFailureHandler(http.HandlerFunc(csrfFailHandler))
 
 	r.Static("/assets", "./templates/assets")
 	r.LoadHTMLGlob("templates/*.html")
@@ -34,15 +32,16 @@ func main() {
 	r.GET("/", func(c *gin.Context) { c.HTML(200, "index.html", nil) })
 
 	viewRoutes := r.Group("/view")
+	viewRoutes.Use(middleware.TokenAuthMiddleware())
+
 	{
-		viewRoutes.GET("/user", middleware.TokenAuthMiddleware(), func(c *gin.Context) {
+		viewRoutes.GET("/user", func(c *gin.Context) {
 			c.Writer.Header().Set("X-CSRF-Token", nosurf.Token(c.Request))
 
 			c.HTML(200, "user.html", gin.H{"Title": "會員管理", "csrf_token": nosurf.Token(c.Request)})
 		})
-		viewRoutes.GET("/group", middleware.TokenAuthMiddleware(), func(c *gin.Context) {
+		viewRoutes.GET("/group", func(c *gin.Context) {
 			c.Writer.Header().Set("X-CSRF-Token", nosurf.Token(c.Request))
-
 			c.HTML(200, "group.html", gin.H{"Title": "部門管理", "csrf_token": nosurf.Token(c.Request)})
 		})
 	}
@@ -55,8 +54,6 @@ func main() {
 			c.HTML(200, "register.html", gin.H{
 				"Title":      "Register",
 				"csrf_token": nosurf.Token(c.Request),
-				// csrf.TemplateTag: csrf.TemplateField(c.Request),
-				// "csrfField":      csrf.TemplateField(c.Request),
 			})
 		})
 
@@ -68,9 +65,6 @@ func main() {
 			c.HTML(200, "login.html", gin.H{
 				"Title":      "Login",
 				"csrf_token": nosurf.Token(c.Request),
-				// csrf.TemplateTag:     csrf.TemplateField(c.Request),
-				// "gorilla.csrf.Token": csrf.Token(c.Request),
-				// "csrfField":          csrf.Token(c.Request),
 			})
 		})
 		AuthRoutes.POST("/login", h.Login)
@@ -82,39 +76,20 @@ func main() {
 	apiRoutes.Use(middleware.TokenAuthMiddleware())
 	{
 		apiRoutes.GET("/users", h.FetchAllRoute("user"))
-		apiRoutes.GET("/addUser", h.AddRoute("user"))
+		apiRoutes.POST("/addUser", h.AddRoute("user"))
 		apiRoutes.GET("/findUser", h.FindRoute("user"))
-		apiRoutes.GET("/deleteUser", h.DeleteRoute("user"))
+		apiRoutes.POST("/deleteUser", h.DeleteRoute("user"))
 
 		apiRoutes.GET("/groups", h.FetchAllRoute("group"))
-		apiRoutes.GET("/addGroup", h.AddRoute("group"))
+		apiRoutes.POST("/addGroup", h.AddRoute("group"))
 		apiRoutes.GET("/findGroup", h.FindRoute("group"))
-		apiRoutes.GET("/deleteGroup", h.DeleteRoute("group"))
+		apiRoutes.POST("/deleteGroup", h.DeleteRoute("group"))
 	}
-	// r.Run(":1106")
+	r.Run(":1106")
 	//========nosurf========
-	http.ListenAndServe(":1106", csrf)
-	// http.ListenAndServe(":1106",
-	// 	csrf.Protect([]byte("32-byte-long-auth-key"))(r))
+	// http.ListenAndServe(":1106", csrf)
+
 }
-
-// var csrfMd func(http.Handler) http.Handler = csrf.Protect([]byte("32-byte-long-auth-key"),
-// 	csrf.MaxAge(0),
-// 	csrf.Secure(false),
-// 	csrf.ErrorHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		w.WriteHeader(http.StatusForbidden)
-// 		w.Write([]byte(`{"message": "Forbidden - CSRF token invalid"}`))
-// 		w.Write([]byte(csrf.Token(r)))
-// 		fmt.Fprintf(w, "%s\n", nosurf.Reason(r))
-// 		log.Println("==============================================")
-// 		log.Println(fmt.Fprintf(w, "%s\n", nosurf.Reason(r)))
-// 		log.Println(csrf.Token(r))
-// 	})),
-// )
-
-// func CSRF() gin.HandlerFunc {
-// 	return adapter.Wrap(csrfMd)
-// }
 
 //========nosurf========
 func csrfFailHandler(w http.ResponseWriter, r *http.Request) {

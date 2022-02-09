@@ -2,6 +2,8 @@ package handler
 
 import (
 	"GO-GIN_REST_API/entity"
+	"encoding/json"
+	"io/ioutil"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -28,50 +30,66 @@ func (h *Handler) FetchAllRoute(x string) gin.HandlerFunc {
 }
 
 func (h *Handler) AddRoute(x string) gin.HandlerFunc {
+
 	return func(c *gin.Context) {
 		switch x {
 		case "group":
-			//group=GroupABC&groupId=777&door=B
-			groupId := c.Query("groupId")
-			door := c.Query("door")
-			group := c.Query("group")
+			c.Writer.Header().Set("X-CSRF-Token", nosurf.Token(c.Request))
 
-			err := h.backend.Set("b2:dm:group:"+groupId, &entity.Group{Group: group, GroupId: groupId, Door: door})
+			group := entity.Group{}
+			data, err := ioutil.ReadAll(c.Request.Body)
+			if err != nil {
+				log.Println("jsonData:", err)
+			}
+			err = json.Unmarshal(data, &group)
+			if err != nil {
+				log.Println(err.Error())
+			}
+			err = h.backend.Set("b2:dm:group:"+group.GroupId, &entity.Group{Group: group.Group, GroupId: group.GroupId, Door: group.Door})
 			if err != nil {
 				log.Println("SetGroup failed:", err)
 			} else {
 				c.JSON(200, gin.H{
 					"message":    "新增Group成功",
-					"key":        "b2:dm:group:" + groupId,
-					"group":      group,
-					"groupId":    groupId,
-					"door":       door,
+					"key":        "b2:dm:group:" + group.GroupId,
+					"group":      group.Group,
+					"groupId":    group.GroupId,
+					"door":       group.Door,
 					"csrf_token": nosurf.Token(c.Request),
 				})
 			}
 
 		case "user":
+			c.Writer.Header().Set("X-CSRF-Token", nosurf.Token(c.Request))
 
-			//group=GroupABC&groupId=777&door=B
-			username := c.Query("username")
-			cardId := c.Query("cardId")
-			groupId := c.Query("groupId")
-			group := h.backend.GetGroup("b2:dm:group:" + groupId).Group
-			door := h.backend.GetGroup("b2:dm:group:" + groupId).Door
-			log.Println("Get User's Group:", group)
-
-			err := h.backend.Set("b2:dm:user:"+cardId, &entity.User{Username: username, GroupId: &entity.Group{GroupId: groupId, Group: group, Door: door}, CardId: cardId})
-
+			user := entity.User{}
+			data, err := ioutil.ReadAll(c.Request.Body)
 			if err != nil {
+				log.Println("jsonData:", err)
+			}
+			err = json.Unmarshal(data, &user)
+			if err != nil {
+				log.Println(err.Error())
+			}
+			log.Println(string(data))
+			log.Println(user)
+
+			group := h.backend.GetGroup("b2:dm:group:" + user.GroupId.GroupId).Group
+			door := h.backend.GetGroup("b2:dm:group:" + user.GroupId.GroupId).Door
+
+			dberr := h.backend.Set("b2:dm:user:"+user.CardId, &entity.User{Username: user.Username, GroupId: &entity.Group{GroupId: user.GroupId.GroupId, Group: group, Door: door}, CardId: user.CardId})
+
+			if dberr != nil {
 				log.Println("SetUser failed:", err)
 			} else {
+				// c.JSON(200, user)
 				c.JSON(200, gin.H{
 					"message":    "新增User成功",
-					"key":        "b2:dm:user:" + cardId,
-					"username":   username,
-					"cardId":     cardId,
+					"key":        "b2:dm:user:" + user.CardId,
+					"username":   user.Username,
+					"cardId":     user.CardId,
 					"group":      group,
-					"groupId":    groupId,
+					"groupId":    user.GroupId.GroupId,
 					"csrf_token": nosurf.Token(c.Request),
 				})
 			}
@@ -83,9 +101,18 @@ func (h *Handler) DeleteRoute(x string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		switch x {
 		case "user":
-			cardId := c.Query("cardId")
+			c.Writer.Header().Set("X-CSRF-Token", nosurf.Token(c.Request))
 
-			err := h.backend.Del("b2:dm:user:" + cardId)
+			user := entity.User{}
+			data, err := ioutil.ReadAll(c.Request.Body)
+			if err != nil {
+				log.Println("jsonData:", err)
+			}
+			err = json.Unmarshal(data, &user)
+			if err != nil {
+				log.Println(err.Error())
+			}
+			err = h.backend.Del("b2:dm:user:" + user.CardId)
 			if err != nil {
 				log.Println("err:", err)
 				c.String(200, "not found this group")
@@ -93,14 +120,23 @@ func (h *Handler) DeleteRoute(x string) gin.HandlerFunc {
 
 				c.JSON(200, gin.H{
 					"message":    "刪除User成功",
-					"cardId":     cardId,
+					"cardId":     user.CardId,
 					"csrf_token": nosurf.Token(c.Request),
 				})
 			}
 		case "group":
-			groupId := c.Query("groupId")
+			c.Writer.Header().Set("X-CSRF-Token", nosurf.Token(c.Request))
+			group := entity.Group{}
+			data, err := ioutil.ReadAll(c.Request.Body)
+			if err != nil {
+				log.Println("jsonData:", err)
+			}
+			err = json.Unmarshal(data, &group)
+			if err != nil {
+				log.Println(err.Error())
+			}
 
-			err := h.backend.Del("b2:dm:group:" + groupId)
+			err = h.backend.Del("b2:dm:group:" + group.GroupId)
 			if err != nil {
 				log.Println("err:", err)
 				c.String(200, "not found this group")
@@ -108,7 +144,7 @@ func (h *Handler) DeleteRoute(x string) gin.HandlerFunc {
 
 				c.JSON(200, gin.H{
 					"message":    "刪除Group成功",
-					"groupId":    groupId,
+					"groupId":    group.GroupId,
 					"csrf_token": nosurf.Token(c.Request),
 				})
 			}

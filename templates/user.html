@@ -14,13 +14,13 @@
           <h2 id="editlabel"></h2>
         </tr>
         <tr>
+          <input type="hidden" name="csrf_token" value="{{ .csrf_token }}" />
           姓名:
           <input type="text" id="username" placeholder="username" required />
           卡號:
           <input type="text" id="cardId" placeholder="cardId" required />
           部門編號:
           <input type="text" id="groupId" placeholder="groupId" required />
-          <input type="hidden" name="csrf_token" value="{{ .csrf_token }}" />
 
           <input type="button" class="add-row" value="" />
         </tr>

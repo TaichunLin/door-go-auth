@@ -16,12 +16,17 @@ $(document).ready(() => {
   $(".add-row").click(() => {
     let username = $("#username").val();
     let cardId = $("#cardId").val();
-
     let groupId = $("#groupId").val();
 
-    fetch(
-      `http://localhost:1106/api/addUser?cardId=${cardId}&groupId=${groupId}&username=${username}`
-    )
+    fetch(`http://localhost:1106/api/addUser`, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify({
+        cardId: `${cardId}`,
+        groupId: { groupId: `${groupId}` },
+        username: `${username}`,
+      }),
+    })
       .then((res) => res.json())
       .then((data) => {
         console.log("newUser:", data);
@@ -107,8 +112,25 @@ let FetchAllUsers = () => {
     .catch((err) => console.log(err));
 };
 
+const csrf_token = document
+  .querySelector("meta[http-equiv='csrf-token']")
+  .getAttribute("content");
+
+let headers = {
+  "Content-Type": "application/json; charset=utf-8",
+  Accept: "application/json",
+  // Authorization: `Bearer ${token}`,
+  "X-CSRF-Token": csrf_token,
+};
+
 let FetchDelUser = (cardId) => {
-  fetch(`http://localhost:1106/api/deleteUser?cardId=${cardId}`);
+  fetch(`http://localhost:1106/api/deleteUser`, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify({
+      cardId: `${cardId}`,
+    }),
+  });
   FetchAllUsers();
 };
 

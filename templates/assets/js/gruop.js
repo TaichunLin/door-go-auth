@@ -1,4 +1,16 @@
 $(document).ready(() => {
+  // const token = xxxxx;
+  const csrf_token = document
+    .querySelector("meta[http-equiv='csrf-token']")
+    .getAttribute("content");
+
+  let headers = {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+    // Authorization: `Bearer ${token}`,
+    "X-Csrf-Token": csrf_token,
+  };
+
   FetchGetAll();
 
   let modal = $("#myModal");
@@ -18,9 +30,20 @@ $(document).ready(() => {
     let group = $("#group").val();
     let groupId = $("#groupId").val();
 
-    fetch(
-      `http://localhost:1106/api/addGroup?groupId=${groupId}&group=${group}&door=${door}`
-    )
+    fetch(`http://localhost:1106/api/addGroup`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "X-Csrf-Token": $('meta[http-equiv="csrf-token"]').attr("content"),
+        "Content-Type": "application/json; charset=utf-8",
+      },
+      body: JSON.stringify({
+        group: `${group}`,
+        groupId: `${groupId}`,
+        door: `${door}`,
+      }),
+    })
       .then((res) => res.json())
       .then((data) => {
         console.log("newGroup:", data);
@@ -32,11 +55,12 @@ $(document).ready(() => {
   $(document).on("click", ".delete-row", () => {
     need2del = $(".checkbox").filter((index, item) => {
       if ($(item).is(":checked")) {
+        console.log("???", item.id.split("_")[1]);
         FetchDel(item.id.split("_")[1]);
       }
       return $(item).is(":checked");
     });
-    console.log(need2del);
+    console.log("need2del: ", need2del);
   });
   $(document).on("click", "#CheckAll", (e) => {
     console.log($(e.target).is(":checked"));
@@ -66,9 +90,8 @@ $(document).ready(() => {
     }
     modal.css("display", "block");
   });
-
-  let csrfToken = document.getElementsByName("gorilla.csrf.Token")[0].value;
-  console.log(csrfToken);
+  var token = $('meta[http-equiv="csrf-token"]').attr("content");
+  console.log(token);
 });
 
 let FetchGetAll = () => {
@@ -107,13 +130,19 @@ let FetchGetAll = () => {
 };
 
 let FetchDel = (groupId) => {
-  fetch(`http://localhost:1106/api/deleteGroup?groupId=${groupId}`);
+  fetch(`http://localhost:1106/api/deleteGroup`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      "X-CSRF-Token": $('meta[http-equiv="csrf-token"]').attr("content"),
+    },
+    body: JSON.stringify({
+      groupId: `${groupId}`,
+    }),
+  });
   FetchGetAll();
 };
-
-// var csrf_token = document
-//   .querySelector("meta[http-equiv='csrf-token']")
-//   .getAttribute("content");
 
 // function csrfSafeMethod(method) {
 //   // these HTTP methods do not require CSRF protection

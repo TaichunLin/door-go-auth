@@ -29,14 +29,18 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 				}
 				return []byte(os.Getenv("ACCESS_SECRET")), nil
 			})
-			fmt.Printf("%#v	\n", val)
-			log.Println("val: ", val)
-			log.Println("err: ", err)
-			if _, ok := val.Claims.(jwt.MapClaims); !ok && !val.Valid {
+			if err != nil {
+				handler.ErrorHtml(c, "text.html", "Unauthorized", "something wrong 4 ", err.Error())
+				c.AbortWithStatus(http.StatusBadRequest)
+				return
+			}
+			if _, ok := val.Claims.(jwt.MapClaims); ok && val.Valid {
+				c.Next()
+
+			} else {
 				handler.ErrorHtml(c, "text.html", "Unauthorized", "something wrong 2 ", err.Error())
 				return
 			}
-			c.Next()
 		} else {
 			refresh, err := c.Cookie("refresh")
 			switch refresh != "" {
@@ -44,7 +48,6 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 				c.Redirect(http.StatusFound, "/auth/token/refresh")
 			case false:
 				handler.ErrorHtml(c, "text.html", "Unauthorized", "something wrong 3 ", err.Error())
-				c.Abort()
 			}
 		}
 
