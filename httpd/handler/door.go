@@ -34,7 +34,6 @@ func (h *Handler) AddRoute(x string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		switch x {
 		case "group":
-			c.Writer.Header().Set("X-CSRF-Token", nosurf.Token(c.Request))
 
 			group := entity.Group{}
 			data, err := ioutil.ReadAll(c.Request.Body)
@@ -60,7 +59,6 @@ func (h *Handler) AddRoute(x string) gin.HandlerFunc {
 			}
 
 		case "user":
-			c.Writer.Header().Set("X-CSRF-Token", nosurf.Token(c.Request))
 
 			user := entity.User{}
 			data, err := ioutil.ReadAll(c.Request.Body)
@@ -101,7 +99,6 @@ func (h *Handler) DeleteRoute(x string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		switch x {
 		case "user":
-			c.Writer.Header().Set("X-CSRF-Token", nosurf.Token(c.Request))
 
 			user := entity.User{}
 			data, err := ioutil.ReadAll(c.Request.Body)
@@ -125,7 +122,6 @@ func (h *Handler) DeleteRoute(x string) gin.HandlerFunc {
 				})
 			}
 		case "group":
-			c.Writer.Header().Set("X-CSRF-Token", nosurf.Token(c.Request))
 			group := entity.Group{}
 			data, err := ioutil.ReadAll(c.Request.Body)
 			if err != nil {

@@ -8,7 +8,7 @@ $(document).ready(() => {
     "Content-Type": "application/json",
     Accept: "application/json",
     // Authorization: `Bearer ${token}`,
-    "X-Csrf-Token": csrf_token,
+    "X-CSRF-Token": csrf_token,
   };
 
   FetchGetAll();
@@ -35,7 +35,7 @@ $(document).ready(() => {
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        "X-Csrf-Token": $('meta[http-equiv="csrf-token"]').attr("content"),
+        "X-CSRF-Token": $('meta[http-equiv="csrf-token"]').attr("content"),
         "Content-Type": "application/json; charset=utf-8",
       },
       body: JSON.stringify({
@@ -90,8 +90,6 @@ $(document).ready(() => {
     }
     modal.css("display", "block");
   });
-  var token = $('meta[http-equiv="csrf-token"]').attr("content");
-  console.log(token);
 });
 
 let FetchGetAll = () => {
@@ -143,18 +141,3 @@ let FetchDel = (groupId) => {
   });
   FetchGetAll();
 };
-
-// function csrfSafeMethod(method) {
-//   // these HTTP methods do not require CSRF protection
-//   return /^(GET|HEAD|OPTIONS)$/.test(method);
-// }
-// var o = XMLHttpRequest.prototype.open;
-
-// XMLHttpRequest.prototype.open = function () {
-//   var res = o.apply(this, arguments);
-//   var err = new Error();
-//   if (!csrfSafeMethod(arguments[0])) {
-//     this.setRequestHeader("X-CSRF-Token", csrf_token);
-//   }
-//   return res;
-// };

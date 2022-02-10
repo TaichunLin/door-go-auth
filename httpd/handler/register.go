@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/justinas/nosurf"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -25,7 +26,12 @@ func (h *Handler) Register(c *gin.Context) {
 		if err != nil {
 			ErrorHtml(c, "register.html", "Register", "Registration Failed", err.Error())
 		} else {
-			Html(c, 200, "text.html", "You have successfully registered.", "Please log in.", "Welcome,"+username)
+			c.HTML(200, "login.html", gin.H{
+				"Title":      "Login",
+				"Detail":     "registered successfully",
+				"Detail2":    "Please log in.",
+				"csrf_token": nosurf.Token(c.Request),
+			})
 		}
 	}
 }

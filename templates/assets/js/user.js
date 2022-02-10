@@ -17,7 +17,6 @@ $(document).ready(() => {
     let username = $("#username").val();
     let cardId = $("#cardId").val();
     let groupId = $("#groupId").val();
-
     fetch(`http://localhost:1106/api/addUser`, {
       method: "POST",
       headers: headers,
@@ -25,6 +24,7 @@ $(document).ready(() => {
         cardId: `${cardId}`,
         groupId: { groupId: `${groupId}` },
         username: `${username}`,
+        csrf_token: `${csrf_token}`,
       }),
     })
       .then((res) => res.json())
@@ -129,22 +129,8 @@ let FetchDelUser = (cardId) => {
     headers: headers,
     body: JSON.stringify({
       cardId: `${cardId}`,
+      csrf_token: `${csrf_token}`,
     }),
   });
   FetchAllUsers();
 };
-
-// var csrf_token = $('meta[http-equiv="csrf-token"]').attr("content");
-
-// function csrfSafeMethod(method) {
-// these HTTP methods do not require CSRF protection
-//   return /^(GET|HEAD|OPTIONS)$/.test(method);
-// }
-
-// $.ajaxSetup({
-//   beforeSend: function (xhr, settings) {
-//     if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-//       xhr.setRequestHeader("X-CSRF-Token", csrf_token);
-//     }
-//   },
-// });

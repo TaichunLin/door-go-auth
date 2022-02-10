@@ -3,8 +3,6 @@ package main
 import (
 	"GO-GIN_REST_API/httpd/handler"
 	"GO-GIN_REST_API/middleware"
-	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -20,10 +18,19 @@ func main() {
 
 	r := gin.Default()
 	r.Use(middleware.CORSMiddleware())
-	//========nosurf========
-	// csrf := nosurf.New(r)
-	// csrf.SetFailureHandler(http.HandlerFunc(csrfFailHandler))
 
+	//========nosurf========
+	csrf := nosurf.New(r)
+	csrf.SetBaseCookie(http.Cookie{
+		Name:     "csrf_token",
+		Domain:   "localhost",
+		MaxAge:   3600 * 4,
+		HttpOnly: true,
+		Secure:   false,
+	})
+	csrf.SetFailureHandler(http.HandlerFunc(middleware.CsrfFailHandler))
+	csrf.ExemptRegexp("/static(.*)")
+	r.Use(middleware.SetCSRFTokenResHeader())
 	r.Static("/assets", "./templates/assets")
 	r.LoadHTMLGlob("templates/*.html")
 
@@ -36,12 +43,9 @@ func main() {
 
 	{
 		viewRoutes.GET("/user", func(c *gin.Context) {
-			c.Writer.Header().Set("X-CSRF-Token", nosurf.Token(c.Request))
-
 			c.HTML(200, "user.html", gin.H{"Title": "會員管理", "csrf_token": nosurf.Token(c.Request)})
 		})
 		viewRoutes.GET("/group", func(c *gin.Context) {
-			c.Writer.Header().Set("X-CSRF-Token", nosurf.Token(c.Request))
 			c.HTML(200, "group.html", gin.H{"Title": "部門管理", "csrf_token": nosurf.Token(c.Request)})
 		})
 	}
@@ -50,7 +54,6 @@ func main() {
 	{
 		//ShowRegistrationPage
 		AuthRoutes.GET("/registerPage", func(c *gin.Context) {
-			c.Writer.Header().Set("X-CSRF-Token", nosurf.Token(c.Request))
 			c.HTML(200, "register.html", gin.H{
 				"Title":      "Register",
 				"csrf_token": nosurf.Token(c.Request),
@@ -61,7 +64,6 @@ func main() {
 
 		//ShowLoginPage
 		AuthRoutes.GET("/loginPage", func(c *gin.Context) {
-			c.Writer.Header().Set("X-CSRF-Token", nosurf.Token(c.Request))
 			c.HTML(200, "login.html", gin.H{
 				"Title":      "Login",
 				"csrf_token": nosurf.Token(c.Request),
@@ -85,15 +87,7 @@ func main() {
 		apiRoutes.GET("/findGroup", h.FindRoute("group"))
 		apiRoutes.POST("/deleteGroup", h.DeleteRoute("group"))
 	}
-	r.Run(":1106")
-	//========nosurf========
-	// http.ListenAndServe(":1106", csrf)
 
-}
+	http.ListenAndServe(":1106", csrf)
 
-//========nosurf========
-func csrfFailHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "%s\n", nosurf.Reason(r))
-	log.Println("==============================================")
-	log.Println(fmt.Fprintf(w, "%s\n", nosurf.Reason(r)))
 }
